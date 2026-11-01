@@ -40,6 +40,7 @@ ENDPOINT_TIMEOUTS = {
     "bulk_fuzzy_match": 180,
     "find_similar_functions_fuzzy": 60,
     "import_file": 300,
+    "resolve_api_hashes": 1800,
     "run_ghidra_script": 1800,
     "run_script_inline": 1800,
     # Ghidra's default decompile cap is 60s. The bridge must outlive it so the
@@ -63,7 +64,7 @@ REQUEST_TIMEOUT_GRACE_SECONDS = 15
 # work (for example run_script_inline/run_ghidra_script or a user-raised
 # decompile timeout). Keep the transport alive slightly longer so the bridge can
 # receive and forward Ghidra's final status instead of closing first.
-MAX_REQUEST_TIMEOUT_SECONDS = 1815
+MAX_REQUEST_TIMEOUT_SECONDS = 3615
 
 try:
     MAX_CONCURRENT_GHIDRA_REQUESTS = max(1, int(os.getenv("GHIDRA_MCP_MAX_CONCURRENT_REQUESTS", "4")))

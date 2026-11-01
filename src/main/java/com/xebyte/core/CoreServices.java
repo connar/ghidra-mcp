@@ -32,6 +32,7 @@ public record CoreServices(
         MalwareSecurityService malwareSecurity,
         ProgramScriptService programScript,
         EmulationService emulation,
+        HashResolverService hashResolver,
         FunctionBundleService functionBundle,
         TypeReferenceService typeReference,
         ChangeTokenService changeToken,
@@ -55,6 +56,7 @@ public record CoreServices(
             new MalwareSecurityService(provider, ts),
             new ProgramScriptService(provider, ts),
             new EmulationService(provider, ts),
+            new HashResolverService(provider, ts),
             new FunctionBundleService(provider, ts, function),
             new TypeReferenceService(provider),
             new ChangeTokenService(provider),
@@ -66,7 +68,7 @@ public record CoreServices(
     public List<Object> all() {
         return List.of(listing, comment, symbolLabel, function, xrefCallGraph, dataType,
             documentationHash, analysis, malwareSecurity, programScript, emulation,
-            functionBundle, typeReference, changeToken, partition, tree);
+            hashResolver, functionBundle, typeReference, changeToken, partition, tree);
     }
 
     /** The shared services plus a server's own, ready to hand to {@link AnnotationScanner}. */

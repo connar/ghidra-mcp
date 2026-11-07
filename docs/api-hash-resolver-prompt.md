@@ -1,17 +1,21 @@
 # Frozen agent prompt for resolve_api_hashes
 
-This is the prompt used for every end-to-end sample run. It is fixed as of the
-Zloader run and must be pasted verbatim. The harness under test is the resolver
-plus this prompt, so changing the wording changes the experiment and invalidates
-comparison across samples.
+The prompt used for every end-to-end sample run. It must be pasted verbatim. The
+harness under test is the resolver plus this prompt, so changing the wording changes
+the experiment and invalidates comparison across samples.
 
-One substitution is permitted and is a parameter rather than a prompt change.
-The corpus path is `C:/dll_corpus/x86` for a 32-bit sample and
-`C:/dll_corpus/x64` for a 64-bit one. Record which was used in the sample's cfg.
+One substitution is permitted and is a parameter rather than a prompt change: the
+corpus path, `C:/dll_corpus/x86` for a 32-bit sample and `C:/dll_corpus/x64` for a
+64-bit one. Record which was used alongside the run's results.
 
-Any other change to the text is a prompt revision. It must be recorded in
-tool_evolution_log.md against the sample that forced it, and every earlier
-sample is then re-run under the new wording before the counts are compared.
+Any other change to the text is a prompt revision. Record it against the sample that
+forced it, and re-run every earlier sample under the new wording before comparing
+counts across samples.
+
+The prompt deliberately forbids the agent from computing, recalling or guessing a
+hash, and from using any code-execution tool. Only `resolve_api_hashes` may turn a
+hash into a name. Without that constraint the run measures the model's recall of
+published hash tables rather than the tool.
 
 ---
 

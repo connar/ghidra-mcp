@@ -46,7 +46,9 @@ public class HashResolverService {
     private static final int  MAX_STEPS = 100_000;
     private static final int  MAX_MODULES = 64;
 
-    // LockBit 3.0 enumerates System32 for "*.dll" and again for "*.drv".
+    // File types read from the corpus as candidate export sources. A sample that
+    // scans a system directory for libraries may search for .drv files as well
+    // as .dll, and both carry export tables.
     private static final String CORPUS_GLOB = "*.{dll,drv}";
 
     // A degenerate run puts every candidate in one bucket; cap the detail.
@@ -167,8 +169,8 @@ public class HashResolverService {
                             + "literal integer such as \"0\". LEN counts encoding units, so "
                             + "characters, and LEN_BYTES counts bytes. The two differ only "
                             + "under UTF16, where they differ by a factor of two, and samples "
-                            + "disagree about which their routine wants: NetWalker passes a "
-                            + "character count and Latrodectus a byte count (wcslen<<1). Read "
+                            + "disagree about which their routine wants: some pass a "
+                            + "character count, others a byte count such as wcslen<<1. Read "
                             + "which one off the call site rather than assuming. "
                             + "For a 32-bit cdecl hash(name, len, fold) pass "
                             + "[\"0\", \"0\", \"NAME\"]. Pass [] when nothing is on the stack "
@@ -602,8 +604,9 @@ public class HashResolverService {
                         h = callHash(program, monitor, api, name, seedVal, includeNul, holder);
                     } catch (Exception e) {
                         // A name the sample cannot hash can never be the preimage of one of its
-                        // constants, so skipping it loses nothing. Conti copies each candidate into
-                        // a 64-byte stack buffer unchecked, so names at or over that length fault.
+                        // constants, so skipping it loses nothing. Some hash routines copy each
+                        // name into a fixed-size buffer without checking its length, so a long
+                        // export name makes them fault.
                         skippedHere++;
                         if (skippedExamples.size() < MAX_SKIPPED_EXAMPLES)
                             skippedExamples.add(name + " (" + name.length()
@@ -920,10 +923,10 @@ public class HashResolverService {
 
     /** One emulator reused across candidate names.
      *
-     *  A hash routine that builds a lookup table on first use otherwise pays that
-     *  cost per candidate, since the guard flag resets with the emulator.
-     *  Latrodectus builds a 256-entry CRC-32 table that way: ~18,000 emulated
-     *  instructions against ~180 to hash a fifteen-character name.
+     *  Some hash routines build a lookup table on first use, guarded by a flag.
+     *  With a fresh emulator per candidate the flag resets and the table is
+     *  rebuilt for every name, which can cost far more than the hash itself.
+     *  A real process builds it once, and so does this.
      *
      *  Safe because every run rewrites SP, BP, PC and all argument registers, and
      *  writeString always terminates the candidate. A faulted run is discarded.
@@ -964,8 +967,8 @@ public class HashResolverService {
         EmulatorHelper emu = holder.get();
         try {
             writeString(program, emu, SCRATCH, s, spec.enc);
-            // Samples disagree about which a UTF-16 routine wants: NetWalker's module
-            // hash takes a character count, Latrodectus's takes wcslen<<1.
+            // UTF-16 routines differ on the length they expect: some take it in
+            // characters, others in bytes.
             int units = s.length() + (includeNul ? 1 : 0);
             int bytes = units * ("UTF16".equals(spec.enc) ? 2 : 1);
 
@@ -997,7 +1000,7 @@ public class HashResolverService {
         if ("NAME".equals(tok))      return SCRATCH;
         if ("SEED".equals(tok))      return seed;
         if ("LEN".equals(tok))       return units;
-        // Separate token rather than redefining LEN, which NetWalker depends on.
+        // A separate token, so routines that expect LEN in characters keep working.
         if ("LEN_BYTES".equals(tok)) return bytes;
         return parseLongValue(tok);
     }

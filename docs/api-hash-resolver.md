@@ -168,7 +168,7 @@ the same algorithm — the sample's own code under emulation, and a hand-written
 reimplementation — against the same corpus. Agreement is evidence; disagreement
 localises the error to one of the two.
 
-Example, BlackMatter:
+Example output for one sample:
 
 ```
 constants   210
